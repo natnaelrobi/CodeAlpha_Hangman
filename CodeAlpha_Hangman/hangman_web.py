@@ -1,109 +1,120 @@
-import streamlit as st
+import os
 import random
-import os
-import os
-st.write("Files in directory:", os.listdir())
-st.set_page_config(page_title="Hangman Pro", page_icon="🎯", layout="wide")
+import streamlit as st
 
-HANGMAN_PICS = ['''
-  +---+
-      |
-      |
-      |
-     ===''', '''
-  +---+
-  O   |
-      |
-      |
-     ===''', '''
-  +---+
-  O   |
-  |   |
-      |
-     ===''', '''
-  +---+
-  O   |
- /|   |
-      |
-     ===''', '''
-  +---+
-  O   |
- /|\\  |
-      |
-     ===''', '''
-  +---+
-  O   |
- /|\\  |
- /    |
-     ===''', '''
-  +---+
-  O   |
- /|\\  |
- / \\  |
-     ===''']
+# Page configuration
+st.set_page_config(
+    page_title="Hangman Pro - CodeAlpha", page_icon="🎮", layout="centered"
+)
 
-WORDS = ["PYTHON", "DEVELOPER", "INTERNSHIP", "ALGORITHM", "PROGRAMMING", "INTERFACE", "DEPLOYMENT"]
+# Display Banner Image
+banner_path = "CodeAlpha_Hangman/banner.jpg"
+if os.path.exists(banner_path):
+  st.image(banner_path, use_column_width=True)
 
-if 'word' not in st.session_state:
-    st.session_state.word = random.choice(WORDS)
-    st.session_state.guessed = set()
-    st.session_state.misses = 0
-    st.session_state.game_over = False
-    st.session_state.won = False
+st.title("🎯 CodeAlpha Hangman Game")
+st.write("Guess the secret word letter by letter before you run out of lives!")
 
-st.title("🎯 CodeAlpha Hangman Pro Edition")
+# Word list
+WORDS = [
+    "PYTHON",
+    "STREAMLIT",
+    "PROGRAMMING",
+    "DEVELOPER",
+    "INTERNSHIP",
+    "CODEALPHA",
+    "ALGORITHM",
+]
 
-if os.path.exists("banner.jpg"):
-    st.image("banner.jpg", use_container_width=True)
+# Initialize session state
+if "word" not in st.session_state:
+  st.session_state.word = random.choice(WORDS)
+  st.session_state.guessed_letters = set()
+  st.session_state.attempts_left = 6
+  st.session_state.game_over = False
+  st.session_state.won = False
 
-col1, col2 = st.columns([1, 2])
 
-with col1:
-    st.markdown(f"```text\n{HANGMAN_PICS[st.session_state.misses]}\n```")
+def reset_game():
+  st.session_state.word = random.choice(WORDS)
+  st.session_state.guessed_letters = set()
+  st.session_state.attempts_left = 6
+  st.session_state.game_over = False
+  st.session_state.won = False
 
-with col2:
-    display_word = " ".join([char if char in st.session_state.guessed else "_" for char in st.session_state.word])
-    st.markdown(f"<h1 style='text-align: center; letter-spacing: 5px; font-size: 3rem;'>{display_word}</h1>", unsafe_allow_html=True)
-    st.write("")
-    st.write("")
 
-    if not st.session_state.game_over:
-        cols = st.columns(7)
-        alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        
-        for i, letter in enumerate(alphabet):
-            if cols[i % 7].button(letter, key=letter, use_container_width=True, disabled=letter in st.session_state.guessed):
-                st.session_state.guessed.add(letter)
-                if letter not in st.session_state.word:
-                    st.session_state.misses += 1
-                
-                if st.session_state.misses == len(HANGMAN_PICS) - 1:
-                    st.session_state.game_over = True
-                    st.session_state.won = False
-                elif all(c in st.session_state.guessed for c in st.session_state.word):
-                    st.session_state.game_over = True
-                    st.session_state.won = True
-                
-                st.rerun()
+# Display current word status
+word_display = "".join(
+    [
+        letter if letter in st.session_state.guessed_letters else "_"
+        for letter in st.session_state.word
+    ]
+)
 
-if st.session_state.game_over:
-    st.markdown("---")
-    if st.session_state.won:
-        st.success(f"🎉 INCREDIBLE! You guessed the word: {st.session_state.word}")
-        st.balloons()
-        
-        if os.path.exists("win_effect.mp3"):
-            st.audio("win_effect.mp3", autoplay=True)
-        if os.path.exists("victory.mp4"):
-            st.video("victory.mp4")
-            
-    else:
-        st.error(f"💥 GAME OVER! The correct word was: {st.session_state.word}")
-        
-        if os.path.exists("lose_effect.mp3"):
-            st.audio("lose_effect.mp3", autoplay=True)
+st.markdown(f"### Word: `{word_display}`")
+st.write(f"❤️ Lives remaining: {st.session_state.attempts_left}")
+st.write(
+    f"❌ Guessed letters:"
+    f" {', '.join(sorted(st.session_state.guessed_letters)) if st.session_state.guessed_letters else 'None'}"
+)
 
-    if st.button("🔄 Play Again", use_container_width=True):
-        for key in list(st.session_state.keys()):
-            del st.session_state[key]
+# Game logic & input
+if not st.session_state.game_over:
+  with st.form("guess_form", clear_on_submit=True):
+    guess = st.text_input("Enter a letter:", max_chars=1).upper()
+    submitted = st.form_submit_button("Guess")
+
+    if submitted and guess:
+      if not guess.isalpha():
+        st.warning("Please enter a valid alphabetic letter.")
+      elif guess in st.session_state.guessed_letters:
+        st.info(f"You already guessed '{guess}'. Try another one.")
+      else:
+        st.session_state.guessed_letters.add(guess)
+        if guess in st.session_state.word:
+          st.success(f"Good job! '{guess}' is in the word.")
+        else:
+          st.session_state.attempts_left -= 1
+          st.error(f"Incorrect! '{guess}' is not in the word.")
+
+        # Check win condition
+        if all(
+            letter in st.session_state.guessed_letters
+            for letter in st.session_state.word
+        ):
+          st.session_state.game_over = True
+          st.session_state.won = True
+
+        # Check lose condition
+        elif st.session_state.attempts_left <= 0:
+          st.session_state.game_over = True
+          st.session_state.won = False
+
         st.rerun()
+
+# Game Over State (Win / Lose)
+if st.session_state.game_over:
+  if st.session_state.won:
+    st.balloons()
+    st.success(
+        f"🎉 Congratulations! You guessed the word: {st.session_state.word}"
+    )
+
+    win_audio = "CodeAlpha_Hangman/win_effect.mp3"
+    if os.path.exists(win_audio):
+      st.audio(win_audio, format="audio/mp3")
+
+    victory_video = "CodeAlpha_Hangman/victory.mp4"
+    if os.path.exists(victory_video):
+      st.video(victory_video)
+
+  else:
+    st.error(f"💀 Game Over! The secret word was: {st.session_state.word}")
+
+    lose_audio = "CodeAlpha_Hangman/lose_effect.mp3"
+    if os.path.exists(lose_audio):
+      st.audio(lose_audio, format="audio/mp3")
+
+  if st.button("Play Again"):
+    reset_game()
+    st.rerun()
