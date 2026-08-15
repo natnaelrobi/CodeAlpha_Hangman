@@ -59,6 +59,16 @@ WORDS = [
     "DEPLOYMENT",
 ]
 
+
+def find_file(filename):
+  if os.path.exists(filename):
+    return filename
+  alt_path = os.path.join("CodeAlpha_Hangman", filename)
+  if os.path.exists(alt_path):
+    return alt_path
+  return filename
+
+
 if "word" not in st.session_state:
   st.session_state.word = random.choice(WORDS)
   st.session_state.guessed = set()
@@ -68,8 +78,9 @@ if "word" not in st.session_state:
 
 st.title("🎯 CodeAlpha Hangman Pro Edition")
 
-if os.path.exists("banner.jpg"):
-  st.image("banner.jpg", use_container_width=True)
+banner_file = find_file("banner.jpg")
+if os.path.exists(banner_file):
+  st.image(banner_file, use_container_width=True)
 
 col1, col2 = st.columns([1, 2])
 
@@ -119,16 +130,20 @@ if st.session_state.game_over:
     st.success(f"🎉 INCREDIBLE! You guessed the word: {st.session_state.word}")
     st.balloons()
 
-    if os.path.exists("win_effect.mp3"):
-      st.audio("win_effect.mp3", autoplay=True)
-    if os.path.exists("victory.mp4"):
-      st.video("victory.mp4")
+    win_audio = find_file("win_effect.mp3")
+    if os.path.exists(win_audio):
+      st.audio(win_audio, autoplay=True)
+
+    victory_video = find_file("victory.mp4")
+    if os.path.exists(victory_video):
+      st.video(victory_video)
 
   else:
     st.error(f"💥 GAME OVER! The correct word was: {st.session_state.word}")
 
-    if os.path.exists("lose_effect.mp3"):
-      st.audio("lose_effect.mp3", autoplay=True)
+    lose_audio = find_file("lose_effect.mp3")
+    if os.path.exists(lose_audio):
+      st.audio(lose_audio, autoplay=True)
 
   if st.button("🔄 Play Again", use_container_width=True):
     for key in list(st.session_state.keys()):
