@@ -6,12 +6,12 @@ st.set_page_config(
     page_title="Hangman Pro - CodeAlpha", page_icon="🎮", layout="centered"
 )
 
-banner_path = "banner.jpg"
+banner_path = "CodeAlpha_Hangman/banner.jpg"
 if os.path.exists(banner_path):
   st.image(banner_path, use_column_width=True)
 
 st.title("🎯 CodeAlpha Hangman Game")
-st.write("Guess the secret word letter by letter before you run out of lives!")
+st.write("Guess the secret word letter by letter using the on-screen keyboard!")
 
 WORDS = [
     "PYTHON",
@@ -54,35 +54,30 @@ st.write(
 )
 
 if not st.session_state.game_over:
-  with st.form("guess_form", clear_on_submit=True):
-    guess = st.text_input("Enter a letter:", max_chars=1).upper()
-    submitted = st.form_submit_button("Guess")
+  st.write("### On-Screen Keyboard")
+  alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+  rows = [alphabet[0:9], alphabet[9:18], alphabet[18:26]]
 
-    if submitted and guess:
-      if not guess.isalpha():
-        st.warning("Please enter a valid alphabetic letter.")
-      elif guess in st.session_state.guessed_letters:
-        st.info(f"You already guessed '{guess}'. Try another one.")
-      else:
-        st.session_state.guessed_letters.add(guess)
-        if guess in st.session_state.word:
-          st.success(f"Good job! '{guess}' is in the word.")
-        else:
-          st.session_state.attempts_left -= 1
-          st.error(f"Incorrect! '{guess}' is not in the word.")
-
-        if all(
-            letter in st.session_state.guessed_letters
-            for letter in st.session_state.word
-        ):
-          st.session_state.game_over = True
-          st.session_state.won = True
-
-        elif st.session_state.attempts_left <= 0:
-          st.session_state.game_over = True
-          st.session_state.won = False
-
-        st.rerun()
+  for row in rows:
+    cols = st.columns(len(row))
+    for idx, letter in enumerate(row):
+      with cols[idx]:
+        disabled = letter in st.session_state.guessed_letters
+        if st.button(letter, key=f"btn_{letter}", disabled=disabled):
+          st.session_state.guessed_letters.add(letter)
+          if letter in st.session_state.word:
+            if all(
+                l in st.session_state.guessed_letters
+                for l in st.session_state.word
+            ):
+              st.session_state.game_over = True
+              st.session_state.won = True
+          else:
+            st.session_state.attempts_left -= 1
+            if st.session_state.attempts_left <= 0:
+              st.session_state.game_over = True
+              st.session_state.won = False
+          st.rerun()
 
 if st.session_state.game_over:
   if st.session_state.won:
@@ -91,18 +86,18 @@ if st.session_state.game_over:
         f"🎉 Congratulations! You guessed the word: {st.session_state.word}"
     )
 
-    win_audio = "win_effect.mp3"
+    win_audio = "CodeAlpha_Hangman/win_effect.mp3"
     if os.path.exists(win_audio):
       st.audio(win_audio, format="audio/mp3")
 
-    victory_video = "victory.mp4"
+    victory_video = "CodeAlpha_Hangman/victory.mp4"
     if os.path.exists(victory_video):
       st.video(victory_video)
 
   else:
     st.error(f"💀 Game Over! The secret word was: {st.session_state.word}")
 
-    lose_audio = "lose_effect.mp3"
+    lose_audio = "CodeAlpha_Hangman/lose_effect.mp3"
     if os.path.exists(lose_audio):
       st.audio(lose_audio, format="audio/mp3")
 
