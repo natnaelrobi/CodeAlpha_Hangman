@@ -1,2 +1,0 @@
-[2026-08-14 21:21:05] City: Bahir Dar | Current: 0.0 mm | 24h Max: 1.9 mm | Status: ✅ SAFE: Normal Conditions
-[2026-08-14 21:21:11] City: Bahir Dar | Current: 14.5 mm | 24h Max: 18.0 mm | Status: 🚨 DANGER: FLOOD ALERT!
