@@ -6,7 +6,7 @@ st.set_page_config(
     page_title="Hangman Pro - CodeAlpha", page_icon="🎮", layout="centered"
 )
 
-banner_path = "banner.jpg"
+banner_path = "CodeAlpha_Hangman/banner.jpg"
 if os.path.exists(banner_path):
   st.image(banner_path, use_column_width=True)
 
@@ -91,18 +91,18 @@ if st.session_state.game_over:
         f"🎉 Congratulations! You guessed the word: {st.session_state.word}"
     )
 
-    win_audio = "win_effect.mp3"
+    win_audio = "CodeAlpha_Hangman/win_effect.mp3"
     if os.path.exists(win_audio):
       st.audio(win_audio, format="audio/mp3")
 
-    victory_video = "victory.mp4"
+    victory_video = "CodeAlpha_Hangman/victory.mp4"
     if os.path.exists(victory_video):
       st.video(victory_video)
 
   else:
     st.error(f"💀 Game Over! The secret word was: {st.session_state.word}")
 
-    lose_audio = "lose_effect.mp3"
+    lose_audio = "CodeAlpha_Hangman/lose_effect.mp3"
     if os.path.exists(lose_audio):
       st.audio(lose_audio, format="audio/mp3")
 
