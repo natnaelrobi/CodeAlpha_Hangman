@@ -1,7 +1,8 @@
 import streamlit as st
 import random
 import os
-
+import os
+st.write("Files in directory:", os.listdir())
 st.set_page_config(page_title="Hangman Pro", page_icon="🎯", layout="wide")
 
 HANGMAN_PICS = ['''
