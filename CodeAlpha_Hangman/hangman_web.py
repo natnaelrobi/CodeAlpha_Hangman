@@ -134,10 +134,6 @@ if st.session_state.game_over:
     if os.path.exists(win_audio):
       st.audio(win_audio, autoplay=True)
 
-    victory_video = find_file("victory.mp4")
-    if os.path.exists(victory_video):
-      st.video(victory_video)
-
   else:
     st.error(f"💥 GAME OVER! The correct word was: {st.session_state.word}")
 
